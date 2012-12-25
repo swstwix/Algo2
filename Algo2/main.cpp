@@ -16,18 +16,22 @@ struct work {
 		this->end = end;
 		this->spend = spend;
 	}
-};
 
-bool operator<(const work w1, const work w2)
-{
-	return w1.end < w2.end;
-}
+	bool operator<(const work w) const
+	{
+		return this->end > w.end;
+	}
+};
 
 job* jobs;
 int n, m;
 
 bool myfunc(job j1, job j2) {
 	return j1.a1 < j2.a1;
+}
+
+bool myfunc2(job j1, job j2) {
+	return (j1.a1+j2.a2) < (j2.a1+j2.a2);
 }
 
 int analyze() {
@@ -40,10 +44,12 @@ int analyze() {
 		queue.push(jobs[i]);
 	while (!queue.empty() || !working.empty())
 	{
-		if (working.size() < n && !queue.empty())
+		if (working.size() < m && !queue.empty())
 		{
 			job j = queue.front();
-			working.push(work(last_free+1, j.a3));
+			queue.pop();
+			work work(max(last_free+1,j.a1)+j.a2, j.a3);
+			working.push(work);
 			continue;
 		}
 
@@ -63,8 +69,14 @@ int main() {
 		in >> jobs[i].a1 >> jobs[i].a2 >> jobs[i].a3;
 	
 	sort(jobs, jobs+n, myfunc);
-
 	int res = analyze();
+
+	sort(jobs, jobs+n, myfunc2);
+	res = max(res, analyze());
+	
+	ofstream out("output.txt");
+	out << res;
+	out.close();
 
 	return 0;
 }
